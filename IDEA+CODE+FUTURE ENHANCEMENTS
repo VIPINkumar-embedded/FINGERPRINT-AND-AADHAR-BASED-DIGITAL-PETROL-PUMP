@@ -1,0 +1,586 @@
+The aim of this project is to ease the digital transactions by providing the
+flexibility of the use of individual’s AADHAR and FINGER PRINTS for
+security and simplicity and it is the latest innovational project on the ease of
+doing “DIGITAL TRANSACTION” based on the 2- layer security which is
+“AADHAR“ and “FINGER PRINT” of the user, where the user can add the
+fingerprints of his or her family members on his AADHAR. This scheme
+allows the other family members of the user to use the services of petrol
+pump while the payment is received from the account of registered
+AADHAR number of the family, when the payment is done a message of
+confirmation of transaction will go to the registered mobile number of the
+user indicating that the transaction is successfully done.
+
+Working (Steps)
+
+1.Provide the power 5 volts D.C. to the AVR development board.
+2.Provide the required 12 volts/1 ampere power to the G.S.M. Module by the specified
+12 volts/1 ampere adopter.
+3. Provide the required 5 volts power supply to Arduino UNO board.
+4.Now a message will be displayed on the screen of LCD, "Welcome to the self service
+petrol pump".
+5.In the next step the LCD will display "Enter your fingerprint" indicating the user to
+authenticate/press his/her fingerprint on the fingerprint module.
+6.If the user is not an authorized user i.e his/her fingerprint doesn't matches with the stored
+fingerprints then the system doesn't provide access to that user for further steps and the
+LCD will go in its previous steps and show"welcome to the self service petrol pump".
+7.If the user is authenticated user ,then the system will provide further access to the user
+and the LCD will show "Enter your aadhar password" for further confirmation.
+8.Now the user can enter his/her unique aadhar password with the help of a 4x3keypad.
+9.If the password is not correct then the LCD will show "access denied" and the user is
+blocked from further steps.
+10. If the user's entered password is correct then the system will proceed to the next step
+and the LCD will going to display "Enter the amount" the amount of petrol in rupees to be
+filled.
+11.Now the user enters his/her desired amount in rupees of petrol to be filled with the help
+of keypad.
+12.As soon as the user had entered the amount ,the D.C.motor starts rotating for a
+particular time interval ,indicating that the petrol is being filling to the vehicle.
+13.As the Petrol is being filled up a message is sent to the authenticated user's mobile
+number by the GSM module ,Indictating that the given amount is being deducted from the
+user's account.
+14.D.C. Motor stops rotating.
+15.The process is now completed successfully and the LCD will show "welcome to the
+self service petrol pump" welcoming the next user in queue.
+
+CODE-
+
+The coding of this project is done in Embedded on PROTEUS ISIS and the code is executed
+on Atmel studio 6.1
+
+5.1 AVR CODE:
+
+#include<avr/io.h>
+#include<util/delay.h>
+voidlcdcmd(chara)
+{
+PORTC=0xF0&a;
+PORTC&=~(1<<0);
+PORTC&=~(1<<1);
+PORTC|=(1<<2);
+_delay_ms(100);
+PORTC&=~(1<<2);
+_delay_ms(100);
+a=a<<4;
+
+PORTC=0xF0&a;
+PORTC&=~(1<<0);
+PORTC&=~(1<<1);
+PORTC|=(1<<2);
+_delay_ms(100);
+PORTC&=~(1<<2);
+_delay_ms(100);
+}
+
+voidlcddata(chara)
+{
+PORTC=0xF0&a;
+PORTC|=(1<<0);
+PORTC&=~(1<<1);
+PORTC|=(1<<2);
+_delay_ms(100);
+PORTC&=~(1<<2);
+_delay_ms(100);
+a=a<<4;
+
+PORTC=0xF0&a;
+PORTC|=(1<<0);
+PORTC&=~(1<<1);
+PORTC|=(1<<2);
+_delay_ms(100);
+PORTC&=~(1<<2);
+_delay_ms(100);
+
+}
+
+voiddisplay(chary[])
+{
+inti;
+for(i=0;y[i]!='\0';i++)
+{
+lcddata(y[i]);
+}
+}
+
+voidtx(charx)
+{
+UDR=x;
+while((UCSRA&0b01000000)==0b00000000);
+UCSRA=0x00;
+_delay_ms(10);
+}
+
+voidstrtx(chary[])
+{
+inti;
+for(i=0;y[i]!='\0';i++)
+{
+tx(y[i]);
+}
+}
+intflag=1;
+
+inta[10],i,j=0;;
+main()
+{
+DDRA=0b11100000;
+DDRB=0B00001111;
+DDRC=0xFF;
+lcdcmd(0x02);
+
+lcdcmd(0x28);
+lcdcmd(0x0E);
+PORTB=0xFF;
+UBRRL=51;
+UCSRA=0b00000000;
+UCSRB=0b00011000;
+UCSRC=0b10000110;
+chart[10];
+a:
+i=0,j=0;
+flag=1;
+lcdcmd(0x80);
+display("WELCOME TO SELF ");
+lcdcmd(0xC0);
+display("SERVICE STATION ");
+_delay_ms(2000);
+lcdcmd(0x01);
+display("PLACE YOUR FINGER");
+lcdcmd(0xC0);
+display("PRINT ");
+_delay_ms(5000);
+lcdcmd(0x01);
+if(PINA==0b00000001)
+{
+display("AUTHENTICATED");
+_delay_ms(1000);
+lcdcmd(0x01);
+lcdcmd(0x80);
+display("ENTER YOUR ADHAR ");
+lcdcmd(0xC0);
+display("NUMBER...... ");
+_delay_ms(2000);
+lcdcmd(0x01);
+while(1)
+{
+PORTB=0b11111110;
+if(PINB==0b11101110)
+
+{
+lcddata('1');
+a[i]=1;
+i++;
+_delay_ms(2000);
+}
+if(PINB==0b11011110)
+{
+lcddata('2');
+a[i]=2;
+i++;
+_delay_ms(2000);
+}
+
+if(PINB==0b10111110)
+{
+lcddata('3');
+a[i]=3;
+i++;
+_delay_ms(2000);
+}
+
+PORTB=0b11111101;
+if(PINB==0b11101101)
+{
+lcddata('4');
+a[i]=4;
+i++;
+_delay_ms(2000);
+}
+if(PINB==0b11011101)
+{
+lcddata('5');
+a[i]=5;
+i++;
+_delay_ms(2000);
+}
+if(PINB==0b10111101)
+{
+lcddata('6');
+a[i]=6;
+i++;
+_delay_ms(2000);
+}
+
+PORTB=0b11111011;
+if(PINB==0b11101011)
+{
+lcddata('7');
+a[i]=7;
+i++;
+_delay_ms(2000);
+}
+if(PINB==0b11011011)
+{
+lcddata('8');
+a[i]=8;
+i++;
+_delay_ms(2000);
+}
+
+if(PINB==0b10111011)
+{
+lcddata('9');
+a[i]=9;
+i++;
+_delay_ms(2000);
+}
+if(i==3)
+{
+lcdcmd(0x01);
+if((a[0]==2)&&(a[1]==3)&&(a[2]==5)&&(flag==1))
+{
+flag=0;
+lcdcmd(0x01);
+display("ENTER THE AMOUNT...");
+_delay_ms(500);
+
+///6lcdcmd(0x01);
+lcdcmd(0xc0);
+}
+
+if(flag==0)
+{
+PORTB=0b11111110;
+if(PINB==0b11101110)
+{
+
+lcddata('1');
+t[j]='1';
+j++;
+_delay_ms(2000);
+}
+if(PINB==0b11011110)
+{
+lcddata('2');
+t[j]='2';
+j++;
+_delay_ms(2000);
+}
+
+if(PINB==0b10111110)
+{
+lcddata('3');
+t[j]='3';
+j++;
+_delay_ms(2000);
+}
+
+PORTB=0b11111101;
+if(PINB==0b11101101)
+{
+lcddata('4');
+t[j]='4';
+j++;
+_delay_ms(2000);
+}
+if(PINB==0b11011101)
+{
+lcddata('5');
+t[j]='5';
+j++;
+_delay_ms(2000);
+}
+
+if(PINB==0b10111101)
+{
+lcddata('6');
+t[j]='6';
+j++;
+_delay_ms(2000);
+}
+
+PORTB=0b11111011;
+if(PINB==0b11101011)
+{
+lcddata('7');
+t[j]='7';
+j++;
+_delay_ms(2000);
+}
+if(PINB==0b11011011)
+{
+lcddata('8');
+t[j]='8';
+j++;
+_delay_ms(2000);
+}
+
+if(PINB==0b10111011)
+{
+lcddata('9');
+t[j]='9';
+j++;
+_delay_ms(2000);
+}
+
+if((j==3))
+{
+i=0;
+j=0;
+PORTA=0b01000000;
+_delay_ms(2000);
+PORTA=0b10000000;
+_delay_ms(2000);
+PORTA=0b00000000;
+_delay_ms(200);
+strtx("AT\n\r");
+_delay_ms(100);
+strtx("AT+CMGF=1\n\r");
+_delay_ms(2000);
+strtx("AT+CMGS=\"+917017242854\"\n\r");
+_delay_ms(2000);
+strtx("AMOUNT DETECTED \n\r");
+strtx(t);
+strtx(" /Rs");
+_delay_ms(2000);
+tx(0x1A);
+lcdcmd(0x01);
+break;
+}
+}
+if((flag==2)&&(a[0]!=1)&&(a[1]!=3)&&(a[2]!=5))
+{
+lcdcmd(0x01);
+display("incorrect");
+strtx("AT\n\r");
+_delay_ms(100);
+strtx("AT+CMGF=1\n\r");
+_delay_ms(2000);
+strtx("AT+CMGS=\"+917017242854\"\n\r");
+_delay_ms(2000);
+strtx("WRONG PASSWORD\n\r");
+_delay_ms(2000);
+tx(0x1A);
+
+_delay_ms(2000);
+lcdcmd(0x01);
+break;
+}
+
+}
+
+40
+
+}
+}
+else
+{
+display("ACCESS DENIED");
+_delay_ms(3000);
+lcdcmd(0x01);
+
+}
+
+gotoa;
+}
+
+5.2 CODE FOR STORING FINGERPRINT ARDUINO
+
+#include "FPS_GT511C3.h"
+#include "SoftwareSerial.h"
+//FPS connected to pin 4 and 5 - see previous schemas
+FPS_GT511C3 fps(4, 5);
+void setup()
+{
+Serial.begin(9600);
+//display messages on the classical serial teminal - DEBUG
+fps.UseSerialDebug = true;
+fps.Open();
+//call Enroll to add fingerprint
+enroll();
+}
+void enroll()
+{
+// get the first available id for new finger print
+intenrollid = 0;
+boolusedid = true;
+while (usedid == true)
+{
+usedid = fps.CheckEnrolled(enrollid);
+if (usedid==true) enrollid++;
+}
+//enrollment start here with the first free id
+fps.EnrollStart(enrollid);
+Serial.print("Press finger to Enroll #");
+Serial.println(enrollid);
+// ***** FIRST MEASURE *****
+// wait for finger press
+while(fps.IsPressFinger() == false) delay(100);
+boolbret = fps.CaptureFinger(true);
+intiret = 0;
+if (bret != false)
+{
+//has a finger print captured
+Serial.println("Remove finger");
+// Enroll step 1
+fps.Enroll1();
+//wait for finger removed
+while(fps.IsPressFinger() == true) delay(100);
+// ***** SECOND MEASURE *****
+// Now we need to check the finger print
+// wait for finger press
+Serial.println("Press same finger again");
+while(fps.IsPressFinger() == false) delay(100);
+bret = fps.CaptureFinger(true);
+if (bret != false)
+{
+Serial.println("Remove finger");
+//enroll step 2
+fps.Enroll2();
+//wait for finger removed
+while(fps.IsPressFinger() == true) delay(100);
+// ***** THIRD MEASURE *****
+//Check Again the finger print
+Serial.println("Press same finger yet again");
+while(fps.IsPressFinger() == false) delay(100);
+bret = fps.CaptureFinger(true);
+if (bret != false)
+{
+Serial.println("Remove finger");
+iret = fps.Enroll3();
+if (iret == 0)
+{
+//*** SUCCESS third measure are the same -> NOW finger print is stored
+Serial.println("Enrolling Successfull");
+}
+else
+{
+//*** FAIL For some reason -> NOTHING STORED
+Serial.print("Enrolling Failed with error code:");
+Serial.println(iret);
+}
+}
+elseSerial.println("Failed to capture third finger");
+}
+elseSerial.println("Failed to capture second finger");
+}
+elseSerial.println("Failed to capture first finger");
+}
+//loop is useless here
+void loop()
+{
+delay(100000);
+}
+5.3 CODE FOR COMPARE FINGERPRINT (ARDUINO)
+#include "FPS_GT511C3.h"
+#include "SoftwareSerial.h"
+//FPS connected to pin 4 and 5 - see previous schemas
+FPS_GT511C3 fps(4, 5);
+void setup()
+
+Serial.begin(9600);
+//display messages on the classical serial teminal - DEBUG
+fps.UseSerialDebug = true;
+fps.Open();
+//call Enroll to add fingerprint
+enroll();
+}
+void enroll()
+{
+// get the first available id for new finger print
+intenrollid = 0;
+boolusedid = true;
+while (usedid == true)
+{
+usedid = fps.CheckEnrolled(enrollid);
+if (usedid==true) enrollid++;
+}
+//enrollment start here with the first free id
+fps.EnrollStart(enrollid);
+Serial.print("Press finger to Enroll #");
+Serial.println(enrollid);
+// ***** FIRST MEASURE *****
+// wait for finger press
+while(fps.IsPressFinger() == false) delay(100);
+boolbret = fps.CaptureFinger(true);
+intiret = 0;
+if (bret != false)
+{
+//has a finger print captured
+Serial.println("Remove finger");
+// Enroll step 1
+fps.Enroll1();
+//wait for finger removed
+while(fps.IsPressFinger() == true) delay(100);
+// ***** SECOND MEASURE *****
+// Now we need to check the finger print
+// wait for finger press
+Serial.println("Press same finger again");
+while(fps.IsPressFinger() == false) delay(100);
+bret = fps.CaptureFinger(true);
+if (bret != false)
+{
+Serial.println("Remove finger");
+//enroll step 2
+fps.Enroll2();
+//wait for finger removed
+while(fps.IsPressFinger() == true) delay(100);
+// ***** THIRD MEASURE *****
+//Check Again the finger print
+Serial.println("Press same finger yet again");
+while(fps.IsPressFinger() == false) delay(100);
+bret = fps.CaptureFinger(true);
+if (bret != false)
+{
+Serial.println("Remove finger");
+iret = fps.Enroll3();
+if (iret == 0)
+{
+//*** SUCCESS third measure are the same -> NOW finger print is stored
+Serial.println("Enrolling Successfull");
+}
+else
+{
+//*** FAIL For some reason -> NOTHING STORED
+Serial.print("Enrolling Failed with error code:");
+Serial.println(iret);
+}
+}
+elseSerial.println("Failed to capture third finger");
+}
+elseSerial.println("Failed to capture second finger");
+}
+elseSerial.println("Failed to capture first finger");
+}
+//loop is useless here
+void loop()
+{
+delay(100000);
+}
+CONCLUSION
+
+Implementing the project is very much customer friendly, easy operation at finger tips using
+AADHAR CARD which is a must . Use of AADHAR card technology makes the system
+secure as it gives unique identification to the customer. Once after installing, maintenance is
+very easy. Long queues, time and efforts is saved. The main aim of the project is to give the
+business, substantial savings in labor, time and staff training costs. The software coding in
+Embedded C code gives the required flexibility to design the transactions as per customer’s
+requirement and convenience. Due to automation, fraudulent transactions are eliminated.
+Following are the advantages of the AADHAR based self service petrol pump
+ Improves the use of GSM module in digital transactions.
+ Increases the efficiency of the services of petrol pump (especially in late night
+hours).
+ Enhances the best utilization of TIME.
+ People below18 years of age will not able to access the petrol pump service
+ Increases the overall profit of the petrol pump
+
+
+FUTURE ENHANCEMENT
+
+ The project can be linked with the real- time database of the car user with the help of IOT
+(Internet of things).
+ An option of “NEW REGISTERATION” can also be included in the project asking by
+the user to add his details like AADHAR, fingerprint , car number etc.
+ By linking the project with database available on the national website and AADHAR the
+user can directly pay the money from his bank account which is linked to it’s AADHAR
+number.
+ An additional ADC based “NO SMOKE SYSTEM” can also be added to this project.
