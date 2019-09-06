@@ -1,0 +1,51 @@
+#include "FPS_GT511C3.h"
+#include "SoftwareSerial.h"
+//FPS connected to pin 4 and 5 - see previous schemas
+FPS_GT511C3 fps(4, 5);
+int led = 13;
+void setup()
+{
+Serial.begin(9600);
+delay(100);
+fps.Open();
+fps.SetLED(true);
+pinMode(led, OUTPUT);
+}
+void loop()
+{
+// if a finger is on the sensor
+if (fps.IsPressFinger())
+{
+//capture the finger print
+fps.CaptureFinger(false);
+//get the id
+int id = fps.Identify1_N();
+//maximun finger print stored in 200.
+//Id > 200 is a not recognized one
+if (id <200)
+{
+//finger print recognized: display the id
+Serial.print("Verified ID:");
+Serial.println(id);
+digitalWrite(led, HIGH);
+// ...
+// add you code here for the condition access allowed
+// ...
+}
+else
+{
+//finger print not recognized
+Serial.println("Finger not found");
+digitalWrite(led, LOW);
+// ...
+// add you code here for the condition access disallowed
+// ..
+}
+}
+else
+{
+// wait for finger
+Serial.println("Please press finger");
+}
+delay(100);
+}
